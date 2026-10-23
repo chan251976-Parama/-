@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Trading Analytics & Price Structure Journal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800 flex flex-col">
+
+    <!-- Header / Navbar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-xl shadow-md shadow-blue-500/20">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight text-slate-900">AI Price Structure Analytics</h1>
+                    <p class="text-xs text-slate-500">Multi-Asset Trading & AI Performance Tracker</p>
+                </div>
+            </div>
+            
+            <!-- Global Nav / Actions -->
+            <div class="flex items-center gap-2">
+                <button onclick="switchTab('analyzer')" id="tab-btn-analyzer" class="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 bg-blue-50 text-blue-600 border border-blue-200">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>วิเคราะห์กราฟ AI</span>
+                </button>
+                <button onclick="switchTab('journal')" id="tab-btn-journal" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition-all flex items-center gap-2 border border-transparent">
+                    <i class="fa-solid fa-book"></i>
+                    <span>ประวัติบันทึกการเทรด</span>
+                </button>
+                <button onclick="switchTab('analytics')" id="tab-btn-analytics" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition-all flex items-center gap-2 border border-transparent">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>สถิติ AI Win Rate</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- TAB 1: AI ANALYZER -->
+        <section id="tab-analyzer" class="space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Left Panel: Upload & Settings -->
+                <div class="lg:col-span-5 space-y-4">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h2 class="font-semibold text-slate-900 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-sliders text-blue-600"></i> ตั้งค่าสินทรัพย์และภาพกราฟ
+                            </h2>
+                            <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium">Step 1</span>
+                        </div>
+
+                        <!-- Asset & Timeframe Selectors -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">สินทรัพย์ (Asset)</label>
+                                <select id="asset-type" class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="GOLD">GOLD (XAU/USD)</option>
+                                    <option value="BTC">Bitcoin (BTC/USD)</option>
+                                    <option value="STOCK">Stock / Forex</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Timeframe</label>
+                                <select id="timeframe" class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="5m">5m (Scalping)</option>
+                                    <option value="15m" selected>15m (Intraday)</option>
+                                    <option value="1h">1h (Swing/Intraday)</option>
+                                    <option value="4h">4h (Swing Trade)</option>
+                                    <option value="1d">1d (Position)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Image Input Zone -->
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">อัปโหลดภาพกราฟ (Upload / Paste / Drop)</label>
+                            <div id="drop-zone" class="border-2 border-dashed border-slate-300 hover:border-blue-500 bg-slate-50 hover:bg-blue-50/50 rounded-2xl p-6 text-center cursor-pointer transition-all relative min-h-[220px] flex flex-col items-center justify-center group">
+                                <input type="file" id="file-input" accept="image/*" class="hidden">
+                                
+                                <div id="upload-prompt" class="space-y-2">
+                                    <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                                        <i class="fa-solid fa-cloud-arrow-up text-xl"></i>
+                                    </div>
+                                    <p class="text-sm font-medium text-slate-700">คลิกเพื่ออัปโหลด หรือ ลากไฟล์มาวาง</p>
+                                    <p class="text-xs text-slate-400">รองรับ Ctrl+V เพื่อ วางภาพจาก Clipboard</p>
+                                </div>
+
+                                <div id="preview-container" class="hidden absolute inset-0 rounded-2xl overflow-hidden bg-slate-900 group">
+                                    <img id="image-preview" class="w-full h-full object-contain" src="" alt="Chart Preview">
+                                    <button onclick="removeImage(event)" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-900/80 hover:bg-red-600 text-white flex items-center justify-center text-xs transition-colors shadow">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sample Preset Selector -->
+                        <div>
+                            <span class="text-xs text-slate-500 block mb-1.5">หรือเลือกใช้กราฟตัวอย่างทดลองระบบ:</span>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="loadSampleChart('gold')" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-medium text-slate-700 transition">✨ ทองคำ (Gold)</button>
+                                <button onclick="loadSampleChart('btc')" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-medium text-slate-700 transition">⚡ BTC/USD</button>
+                                <button onclick="loadSampleChart('stock')" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-medium text-slate-700 transition">📈 หุ้น (Stock)</button>
+                            </div>
+                        </div>
+
+                        <!-- Analyze Button -->
+                        <button id="btn-analyze" onclick="analyzeChartWithAI()" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl font-medium shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-2 text-base">
+                            <i class="fa-solid fa-microchip"></i>
+                            <span>เริ่มวิเคราะห์ด้วย AI (Gemini Vision)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Interactive Chart Display & Overlay -->
+                <div class="lg:col-span-7 space-y-4">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm min-h-[460px] flex flex-col justify-between relative">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="font-semibold text-slate-900 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-chart-area text-blue-600"></i> แสดงกราฟพร้อมจุดวิเคราะห์การซื้อขาย (Trade Overlay)
+                            </h2>
+                            <span id="chart-status-badge" class="text-xs bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full font-medium">รอการวิเคราะห์</span>
+                        </div>
+
+                        <!-- Canvas / Overlay Container -->
+                        <div class="relative w-full h-[380px] bg-slate-900 rounded-xl overflow-hidden flex items-center justify-center border border-slate-200 group">
+                            <div id="chart-placeholder" class="text-center text-slate-400 p-6 space-y-2">
+                                <i class="fa-solid fa-chart-line text-4xl text-slate-600"></i>
+                                <p class="text-sm">กรุณาอัปโหลดรูปภาพกราฟ และกดปุ่มวิเคราะห์ข้อมูล</p>
+                            </div>
+                            
+                            <img id="main-chart-display" class="hidden w-full h-full object-contain" src="" alt="Analyzed Chart">
+
+                            <!-- AI Analysis Visual Badge Overlay -->
+                            <div id="trade-overlay-badge" class="hidden absolute top-4 left-4 right-4 bg-slate-900/90 backdrop-blur border border-slate-700 text-white rounded-xl p-3 shadow-lg flex flex-wrap items-center justify-between gap-2">
+                                <div class="flex items-center gap-3">
+                                    <span id="overlay-signal" class="px-3 py-1 rounded-lg text-xs font-bold uppercase bg-emerald-500 text-white">BUY</span>
+                                    <div>
+                                        <div class="text-xs text-slate-400">Entry Level</div>
+                                        <div id="overlay-entry" class="font-bold text-sm text-slate-100">2050.00</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4 text-xs border-l border-slate-700 pl-4">
+                                    <div>
+                                        <span class="text-slate-400">SL:</span>
+                                        <span id="overlay-sl" class="font-semibold text-rose-400 ml-1">2040.00</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-400">TP:</span>
+                                        <span id="overlay-tp" class="font-semibold text-emerald-400 ml-1">2075.00</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-400">R:R:</span>
+                                        <span id="overlay-rr" class="font-semibold text-blue-400 ml-1">1:2.5</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Bar for Analysis -->
+                        <div id="save-bar" class="hidden mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                            <p class="text-xs text-slate-500">วิเคราะห์เสร็จสมบูรณ์ สามารถบันทึกเข้าสู่ Journal ได้ทันที</p>
+                            <button onclick="saveCurrentAnalysis()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl shadow transition flex items-center gap-2">
+                                <i class="fa-solid fa-floppy-disk"></i>
+                                <span>บันทึกผลการวิเคราะห์ (Save Analysis)</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Detailed Price Structure Output Cards -->
+            <div id="analysis-results-section" class="hidden space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-bold text-lg text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-brain text-blue-600"></i> บทวิเคราะห์โครงสร้างราคาแบบละเอียด (AI Structure Report)
+                    </h3>
+                    <span class="text-xs text-slate-500">ประมวลผลด้วย Gemini AI Vision Model</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    
+                    <!-- Card 1: Market Structure -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                        <div class="flex items-center gap-2 text-blue-600 font-semibold text-sm">
+                            <i class="fa-solid fa-sitemap"></i> Market Structure
+                        </div>
+                        <div class="space-y-2 text-sm text-slate-600">
+                            <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                                <span class="text-slate-500">Trend Status:</span>
+                                <span id="res-trend" class="font-medium text-slate-900">Uptrend</span>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                                <span class="text-slate-500">Structure:</span>
+                                <span id="res-structure" class="font-medium text-slate-900">Higher Highs</span>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                                <span class="text-slate-500">BOS / CHoCH:</span>
+                                <span id="res-bos" class="font-medium text-slate-900">BOS Confirmed</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Key Zones -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                        <div class="flex items-center gap-2 text-amber-600 font-semibold text-sm">
+                            <i class="fa-solid fa-layer-group"></i> Key Zones
+                        </div>
+                        <div class="space-y-2 text-sm text-slate-600">
+                            <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                                <span class="text-slate-500">Order Block:</span>
+                                <span id="res-ob" class="font-medium text-slate-900">Bullish OB</span>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                                <span class="text-slate-500">Supply / Demand:</span>
+                                <span id="res-zone" class="font-medium text-slate-900">Demand Zone</span>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                                <span class="text-slate-500">Key S/R Level:</span>
+                                <span id="res-sr" class="font-medium text-slate-900">2045.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Indicator Confluence -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                        <div class="flex items-center gap-2 text-purple-600 font-semibold text-sm">
+                            <i class="fa-solid fa-wave-square"></i> Indicator Confluence
+                        </div>
+                        <div class="space-y-2 text-sm text-slate-600">
+                            <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                                <span class="text-slate-500">RSI Status:</span>
+                                <span id="res-rsi" class="font-medium text-slate-900">Bullish Divergence</span>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                                <span class="text-slate-500">EMA Trend:</span>
+                                <span id="res-ema" class="font-medium text-slate-900">EMA 50 > 200</span>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                                <span class="text-slate-500">Confluence Rating:</span>
+                                <span id="res-confluence" class="font-medium text-emerald-600">High (85%)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 4: Execution Plan -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                        <div class="flex items-center gap-2 text-emerald-600 font-semibold text-sm">
+                            <i class="fa-solid fa-bullseye"></i> Execution Setup
+                        </div>
+                        <div class="space-y-2 text-sm text-slate-600">
+                            <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                                <span class="text-slate-500">Signal:</span>
+                                <span id="res-signal" class="font-bold text-emerald-600">BUY</span>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                                <span class="text-slate-500">Entry / SL / TP:</span>
+                                <span id="res-levels" class="font-medium text-slate-900">2050 / 2040 / 2075</span>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                                <span class="text-slate-500">Risk-Reward:</span>
+                                <span id="res-rr" class="font-medium text-slate-900">1 : 2.5</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Full Summary Box -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+                    <h4 class="font-semibold text-slate-900 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-file-lines text-blue-600"></i> สรุปคำแนะนำและแผนการเทรด (AI Executive Summary)
+                    </h4>
+                    <p id="res-summary" class="text-sm text-slate-600 leading-relaxed">
+                        กราฟแสดงโครงสร้าง Uptrend ชัดเจน มีการ Break of Structure (BOS) ด้านบน ราคาย่อลงมาทดสอบDemand Zone + Bullish Order Block สอดคล้องกับ RSI เกิด Bullish Divergence แนะนำเข้าสถานะ BUY โดยตั้ง Stop Loss ใต้ Swing Low เดิม
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: JOURNAL LOG -->
+        <section id="tab-journal" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="font-bold text-slate-900 text-xl">ประวัติและบันทึกผลการเทรด (Trade Journal)</h2>
+                    <p class="text-xs text-slate-500">บันทึกรายการวิเคราะห์พร้อมติดตามสถานะการเทรดจริง</p>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button onclick="exportData()" class="px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium rounded-xl shadow-sm transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-download"></i> Export JSON
+                    </button>
+                    <button onclick="document.getElementById('import-file').click()" class="px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium rounded-xl shadow-sm transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-upload"></i> Import JSON
+                    </button>
+                    <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
+                </div>
+            </div>
+
+            <!-- Filters Bar -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
+                <div class="flex flex-wrap items-center gap-3">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider"><i class="fa-solid fa-filter"></i> ตัวกรอง:</span>
+                    
+                    <select id="filter-asset" onchange="renderJournalTable()" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl p-2 focus:outline-none">
+                        <option value="ALL">สินทรัพย์ทั้งหมด</option>
+                        <option value="GOLD">Gold (ทองคำ)</option>
+                        <option value="BTC">Bitcoin</option>
+                        <option value="STOCK">Stock/Forex</option>
+                    </select>
+
+                    <select id="filter-timeframe" onchange="renderJournalTable()" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl p-2 focus:outline-none">
+                        <option value="ALL">Timeframe ทั้งหมด</option>
+                        <option value="5m">5m</option>
+                        <option value="15m">15m</option>
+                        <option value="1h">1h</option>
+                        <option value="4h">4h</option>
+                        <option value="1d">1d</option>
+                    </select>
+
+                    <select id="filter-status" onchange="renderJournalTable()" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl p-2 focus:outline-none">
+                        <option value="ALL">สถานะทั้งหมด</option>
+                        <option value="WIN">✅ Win / Hit TP</option>
+                        <option value="LOSS">❌ Loss / Hit SL</option>
+                        <option value="PENDING">⏳ Pending</option>
+                    </select>
+                </div>
+
+                <div class="text-xs text-slate-500">
+                    จำนวนทั้งหมด: <span id="journal-count" class="font-bold text-slate-800">0</span> รายการ
+                </div>
+            </div>
+
+            <!-- Journal Table / Cards Container -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase">
+                                <th class="p-3.5">วันที่/เวลา</th>
+                                <th class="p-3.5">สินทรัพย์</th>
+                                <th class="p-3.5">TF</th>
+                                <th class="p-3.5">สัญญาณ AI</th>
+                                <th class="p-3.5">Entry / SL / TP</th>
+                                <th class="p-3.5">R:R</th>
+                                <th class="p-3.5">สถานะแผนการเทรด</th>
+                                <th class="p-3.5 text-center">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="journal-table-body" class="divide-y divide-slate-100 text-slate-700">
+                            <!-- JS Dynamic Content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: AI WIN RATE ANALYTICS -->
+        <section id="tab-analytics" class="hidden space-y-6">
+            <div>
+                <h2 class="font-bold text-slate-900 text-xl">สถิติประสิทธิภาพของ AI (AI Win Rate & Tracker)</h2>
+                <p class="text-xs text-slate-500">วิเคราะห์ผลลัพธ์ย้อนหลังเพื่อประเมินความแม่นยำของโมเดล AI</p>
+            </div>
+
+            <!-- Analytics Overview Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+                    <div class="text-xs text-slate-500 font-medium">AI Win Rate (%)</div>
+                    <div id="stat-winrate" class="text-3xl font-bold text-emerald-600">0.0%</div>
+                    <p class="text-[11px] text-slate-400">อัตราส่วนการชนะตามแผน</p>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+                    <div class="text-xs text-slate-500 font-medium">สำเร็จตามแผน (Win)</div>
+                    <div id="stat-win-count" class="text-3xl font-bold text-slate-900">0</div>
+                    <p class="text-[11px] text-emerald-500">Hit TP / Target</p>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+                    <div class="text-xs text-slate-500 font-medium">ไม่สำเร็จตามแผน (Loss)</div>
+                    <div id="stat-loss-count" class="text-3xl font-bold text-rose-500">0</div>
+                    <p class="text-[11px] text-rose-400">Hit SL / Invalidation</p>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+                    <div class="text-xs text-slate-500 font-medium">กำลังดำเนินงาน (Pending)</div>
+                    <div id="stat-pending-count" class="text-3xl font-bold text-amber-500">0</div>
+                    <p class="text-[11px] text-amber-500">รอผลลัพธ์การเทรด</p>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Doughnut Chart: Overall Win/Loss -->
+                <div class="lg:col-span-5 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center">
+                    <h3 class="font-semibold text-slate-900 text-sm mb-4 w-full text-left">สัดส่วน Win / Loss รวมทั้งหมด</h3>
+                    <div class="w-full max-w-[260px] h-[260px] relative">
+                        <canvas id="chart-winloss"></canvas>
+                    </div>
+                </div>
+
+                <!-- Bar Chart: Asset Breakdown -->
+                <div class="lg:col-span-7 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 class="font-semibold text-slate-900 text-sm mb-4">สถิติการชนะจำแนกตามประเภทสินทรัพย์ (Asset Breakdown)</h3>
+                    <div class="w-full h-[260px]">
+                        <canvas id="chart-asset-breakdown"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal: View Full Journal Detail -->
+    <div id="journal-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+                    <i class="fa-solid fa-file-chart-column text-blue-600"></i> รายละเอียดบันทึกผลการเทรด
+                </h3>
+                <button onclick="closeJournalModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div class="w-full h-64 bg-slate-900 rounded-xl overflow-hidden border border-slate-200">
+                    <img id="modal-img" class="w-full h-full object-contain" src="" alt="Detail Image">
+                </div>
+
+                <div id="modal-content" class="text-xs space-y-3">
+                    <!-- Dynamic Details inserted by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 border border-slate-700">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+        <span id="toast-msg">ข้อความแจ้งเตือน</span>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        // Key Storage Constant
+        const STORAGE_KEY = 'ai_trading_journal_db';
+
+        // State Store
+        let state = {
+            currentImageBase64: null,
+            currentAnalysis: null,
+            journals: [],
+            activeTab: 'analyzer'
+        };
+
+        // Chart Instance References
+        let winLossChartInstance = null;
+        let assetChartInstance = null;
+
+        // On System Load
+        window.onload = function() {
+            loadJournalData();
+            setupDragAndDrop();
+            setupClipboardPaste();
+            renderJournalTable();
+            updateAnalyticsDashboard();
+        };
+
+        // --- Tab Switching Navigation ---
+        function switchTab(tabName) {
+            state.activeTab = tabName;
+            ['analyzer', 'journal', 'analytics'].forEach(tab => {
+                const sec = document.getElementById(`tab-${tab}`);
+                const btn = document.getElementById(`tab-btn-${tab}`);
+                if (tab === tabName) {
+                    sec.classList.remove('hidden');
+                    btn.className = "px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 bg-blue-50 text-blue-600 border border-blue-200";
+                } else {
+                    sec.classList.add('hidden');
+                    btn.className = "px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition-all flex items-center gap-2 border border-transparent";
+                }
+            });
+
+            if(tabName === 'analytics') {
+                renderAnalyticsCharts();
+            }
+        }
+
+        // --- Image Handling & Drag Drop ---
+        function setupDragAndDrop() {
+            const dropZone = document.getElementById('drop-zone');
+            const fileInput = document.getElementById('file-input');
+
+            dropZone.addEventListener('click', () => fileInput.click());
+            
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileSelect(e.target.files[0]);
+                }
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('border-blue-500', 'bg-blue-50/50');
+                });
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('border-blue-500', 'bg-blue-50/50');
+                });
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                if (dt.files.length > 0) {
+                    handleFileSelect(dt.files[0]);
+                }
+            });
+        }
+
+        function setupClipboardPaste() {
+            window.addEventListener('paste', (e) => {
+                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                for (let item of items) {
+                    if (item.kind === 'file' && item.type.startsWith('image/')) {
+                        const blob = item.getAsFile();
+                        handleFileSelect(blob);
+                        showToast('นำเข้าภาพจาก Clipboard สำเร็จ', 'success');
+                        break;
+                    }
+                }
+            });
+        }
+
+        function handleFileSelect(file) {
+            if (!file.type.startsWith('image/')) {
+                showToast('กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                state.currentImageBase64 = e.target.result;
+                document.getElementById('image-preview').src = state.currentImageBase64;
+                document.getElementById('preview-container').classList.remove('hidden');
+                
+                // Display in Main Overlay Canvas
+                document.getElementById('main-chart-display').src = state.currentImageBase64;
+                document.getElementById('main-chart-display').classList.remove('hidden');
+                document.getElementById('chart-placeholder').classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeImage(e) {
+            e.stopPropagation();
+            state.currentImageBase64 = null;
+            document.getElementById('file-input').value = '';
+            document.getElementById('preview-container').classList.add('hidden');
+            document.getElementById('main-chart-display').classList.add('hidden');
+            document.getElementById('chart-placeholder').classList.remove('hidden');
+            document.getElementById('trade-overlay-badge').classList.add('hidden');
+            document.getElementById('analysis-results-section').classList.add('hidden');
+            document.getElementById('save-bar').classList.add('hidden');
+        }
+
+        // --- Sample Preset Loader ---
+        function loadSampleChart(type) {
+            // High Resolution Placeholder SVG charts for Demo
+            const canvas = document.createElement('canvas');
+            canvas.width = 800;
+            canvas.height = 450;
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, 800, 450);
+
+            // Draw grid
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+            for(let x=0; x<800; x+=50) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,450); ctx.stroke(); }
+            for(let y=0; y<450; y+=50) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(800,y); ctx.stroke(); }
+
+            // Draw Candles
+            const colors = ['#10b981', '#f43f5e'];
+            let price = 200;
+            for(let i=0; i<30; i++) {
+                let isGreen = Math.random() > 0.45;
+                let open = price;
+                let close = isGreen ? open + Math.random()*25 : open - Math.random()*25;
+                let high = Math.max(open, close) + Math.random()*10;
+                let low = Math.min(open, close) - Math.random()*10;
+                let x = 50 + i * 24;
+
+                ctx.strokeStyle = isGreen ? '#10b981' : '#f43f5e';
+                ctx.beginPath(); ctx.moveTo(x, 450 - high); ctx.lineTo(x, 450 - low); ctx.stroke();
+                
+                ctx.fillStyle = isGreen ? '#10b981' : '#f43f5e';
+                ctx.fillRect(x-6, 450 - Math.max(open, close), 12, Math.abs(close - open) || 2);
+                price = close;
+            }
+
+            // Title
+            ctx.fillStyle = '#f8fafc';
+            ctx.font = 'bold 16px Prompt';
+            ctx.fillText(`Sample ${type.toUpperCase()} Technical Chart`, 20, 30);
+
+            const sampleBase64 = canvas.toDataURL('image/png');
+            state.currentImageBase64 = sampleBase64;
+            
+            document.getElementById('image-preview').src = sampleBase64;
+            document.getElementById('preview-container').classList.remove('hidden');
+            document.getElementById('main-chart-display').src = sampleBase64;
+            document.getElementById('main-chart-display').classList.remove('hidden');
+            document.getElementById('chart-placeholder').classList.add('hidden');
+
+            if(type === 'gold') document.getElementById('asset-type').value = 'GOLD';
+            if(type === 'btc') document.getElementById('asset-type').value = 'BTC';
+            if(type === 'stock') document.getElementById('asset-type').value = 'STOCK';
+
+            showToast(`โหลดกราฟตัวอย่าง ${type.toUpperCase()} เรียบร้อย`, 'info');
+        }
+
+        // --- AI Analysis Call (Gemini Vision API Integration) ---
+        async function analyzeChartWithAI() {
+            if (!state.currentImageBase64) {
+                showToast('กรุณาอัปโหลดรูปภาพกราฟก่อนเริ่มวิเคราะห์', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btn-analyze');
+            const asset = document.getElementById('asset-type').value;
+            const timeframe = document.getElementById('timeframe').value;
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>กำลังวิเคราะห์ด้วย AI Vision...</span>`;
+
+            const promptText = `Analyze this financial chart image for ${asset} on ${timeframe} timeframe. 
+            Identify Market Structure, Key Zones, Indicators, and suggest an Execution Setup.
+            Return JSON response strictly following this schema:
+            {
+                "marketStructure": {
+                    "trend": "Uptrend / Downtrend / Sideway",
+                    "structure": "Higher Highs / Lower Lows",
+                    "bosStatus": "BOS Confirmed / CHoCH Detected / None"
+                },
+                "keyZones": {
+                    "orderBlock": "Bullish OB / Bearish OB",
+                    "supplyDemand": "Demand Zone / Supply Zone",
+                    "keySRLevel": "Numeric or Zone level"
+                },
+                "indicatorConfluence": {
+                    "rsiStatus": "Overbought / Oversold / Divergence / Neutral",
+                    "emaTrend": "EMA Bullish / EMA Bearish Alignment",
+                    "confluenceRating": "High (85%) / Medium (60%)"
+                },
+                "executionPlan": {
+                    "signal": "BUY or SELL or WAIT",
+                    "entryPrice": "Estimated Entry Price",
+                    "stopLoss": "Estimated Stop Loss",
+                    "takeProfit": "Estimated Take Profit",
+                    "rrRatio": "Risk Reward Ratio e.g. 1:2.5"
+                },
+                "summary": "Brief concise analysis summary in Thai language."
+            }`;
+
+            try {
+                // Gemini API Call standard payload
+                const base64Data = state.currentImageBase64.split(',')[1];
+                const mimeType = state.currentImageBase64.split(';')[0].split(':')[1] || 'image/png';
+
+                const apiKey = ""; // Canvas runtime injection key
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [
+                        {
+                            role: "user",
+                            parts: [
+                                { text: promptText },
+                                {
+                                    inlineData: {
+                                        mimeType: mimeType,
+                                        data: base64Data
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    generationConfig: {
+                        responseMimeType: "application/json"
+                    }
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('API Request Failed');
+
+                const result = await response.json();
+                const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                const data = JSON.parse(jsonText);
+
+                // Store Result
+                state.currentAnalysis = {
+                    id: Date.now(),
+                    timestamp: new Date().toLocaleString('th-TH'),
+                    asset: asset,
+                    timeframe: timeframe,
+                    image: state.currentImageBase64,
+                    data: data,
+                    status: 'PENDING' // PENDING, WIN, LOSS
+                };
+
+                // Display Results
+                renderAnalysisResults(data);
+                showToast('การวิเคราะห์สำเร็จเรียบร้อย', 'success');
+
+            } catch (error) {
+                console.error("Gemini AI Analysis Error:", error);
+                // Fallback Mocking if API rate limited or offline
+                generateMockAnalysis(asset, timeframe);
+                showToast('ใช้ผลวิเคราะห์จำลองเนื่องจากเกิดข้อผิดพลาด API', 'info');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-microchip"></i> <span>เริ่มวิเคราะห์ด้วย AI (Gemini Vision)</span>`;
+            }
+        }
+
+        // --- Mock Analysis Fallback Generator ---
+        function generateMockAnalysis(asset, timeframe) {
+            const isBuy = Math.random() > 0.4;
+            const mockData = {
+                marketStructure: {
+                    trend: isBuy ? "Uptrend (SMC Bullish)" : "Downtrend (Bearish Structural)",
+                    structure: isBuy ? "Higher High / Higher Low" : "Lower High / Lower Low",
+                    bosStatus: "BOS Confirmed (Break of Structure)"
+                },
+                keyZones: {
+                    orderBlock: isBuy ? "Bullish Order Block (Unmitigated)" : "Bearish Order Block",
+                    supplyDemand: isBuy ? "Fresh Demand Zone" : "Supply Zone Rejection",
+                    keySRLevel: asset === 'GOLD' ? '2042.50' : (asset === 'BTC' ? '64200.00' : '154.20')
+                },
+                indicatorConfluence: {
+                    rsiStatus: isBuy ? "Bullish Divergence (H4)" : "Overbought Rejection",
+                    emaTrend: "EMA 20/50 Cross Alignment",
+                    confluenceRating: "High Confluence (88%)"
+                },
+                executionPlan: {
+                    signal: isBuy ? "BUY" : "SELL",
+                    entryPrice: asset === 'GOLD' ? '2048.00' : (asset === 'BTC' ? '64500' : '155.00'),
+                    stopLoss: asset === 'GOLD' ? '2038.00' : (asset === 'BTC' ? '63800' : '153.50'),
+                    takeProfit: asset === 'GOLD' ? '2072.00' : (asset === 'BTC' ? '66200' : '158.50'),
+                    rrRatio: "1 : 2.4"
+                },
+                summary: `จากการวิเคราะห์ด้วย AI บน Timeframe ${timeframe} ของ ${asset} ราคาได้ตอบสนองบริเวณ key zone สำคัญ สอดคล้องกับอินดิเคเตอร์เชิงโครงสร้าง SMC แนะนำวางกลยุทธ์ตาม Execution Plan อย่างเคร่งครัด`
+            };
+
+            state.currentAnalysis = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleString('th-TH'),
+                asset: asset,
+                timeframe: timeframe,
+                image: state.currentImageBase64,
+                data: mockData,
+                status: 'PENDING'
+            };
+
+            renderAnalysisResults(mockData);
+        }
+
+        // --- Render AI Analysis Results ---
+        function renderAnalysisResults(data) {
+            const plan = data.executionPlan;
+            const ms = data.marketStructure;
+            const kz = data.keyZones;
+            const ic = data.indicatorConfluence;
+
+            // Render Results Cards
+            document.getElementById('res-trend').innerText = ms.trend || '-';
+            document.getElementById('res-structure').innerText = ms.structure || '-';
+            document.getElementById('res-bos').innerText = ms.bosStatus || '-';
+
+            document.getElementById('res-ob').innerText = kz.orderBlock || '-';
+            document.getElementById('res-zone').innerText = kz.supplyDemand || '-';
+            document.getElementById('res-sr').innerText = kz.keySRLevel || '-';
+
+            document.getElementById('res-rsi').innerText = ic.rsiStatus || '-';
+            document.getElementById('res-ema').innerText = ic.emaTrend || '-';
+            document.getElementById('res-confluence').innerText = ic.confluenceRating || '-';
+
+            const sigEl = document.getElementById('res-signal');
+            sigEl.innerText = plan.signal || 'WAIT';
+            sigEl.className = plan.signal === 'BUY' ? 'font-bold text-emerald-600' : (plan.signal === 'SELL' ? 'font-bold text-rose-600' : 'font-bold text-amber-600');
+
+            document.getElementById('res-levels').innerText = `${plan.entryPrice} / ${plan.stopLoss} / ${plan.takeProfit}`;
+            document.getElementById('res-rr').innerText = plan.rrRatio || '1:2';
+            document.getElementById('res-summary').innerText = data.summary || '';
+
+            // Update Chart Visual Overlay Badge
+            const overlaySig = document.getElementById('overlay-signal');
+            overlaySig.innerText = plan.signal;
+            overlaySig.className = plan.signal === 'BUY' ? 'px-3 py-1 rounded-lg text-xs font-bold uppercase bg-emerald-500 text-white' : 'px-3 py-1 rounded-lg text-xs font-bold uppercase bg-rose-500 text-white';
+
+            document.getElementById('overlay-entry').innerText = plan.entryPrice || '-';
+            document.getElementById('overlay-sl').innerText = plan.stopLoss || '-';
+            document.getElementById('overlay-tp').innerText = plan.takeProfit || '-';
+            document.getElementById('overlay-rr').innerText = plan.rrRatio || '-';
+
+            // Unhide UI
+            document.getElementById('trade-overlay-badge').classList.remove('hidden');
+            document.getElementById('analysis-results-section').classList.remove('hidden');
+            document.getElementById('save-bar').classList.remove('hidden');
+            document.getElementById('chart-status-badge').className = "text-xs bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full font-medium";
+            document.getElementById('chart-status-badge').innerText = "วิเคราะห์เสร็จสมบูรณ์";
+        }
+
+        // --- LocalStorage & Journal Data Persistence ---
+        function saveCurrentAnalysis() {
+            if (!state.currentAnalysis) {
+                showToast('ไม่มีข้อมูลการวิเคราะห์เพื่อบันทึก', 'error');
+                return;
+            }
+
+            state.journals.unshift(state.currentAnalysis);
+            persistJournalData();
+            renderJournalTable();
+            updateAnalyticsDashboard();
+
+            showToast('บันทึกผลการวิเคราะห์ลงใน Journal เรียบร้อยแล้ว', 'success');
+            switchTab('journal');
+        }
+
+        function persistJournalData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state.journals));
+        }
+
+        function loadJournalData() {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                try {
+                    state.journals = JSON.parse(raw);
+                } catch (e) {
+                    console.error("Failed to parse stored journals", e);
+                    state.journals = [];
+                }
+            }
+        }
+
+        // --- Journal Table Render & Status Management ---
+        function renderJournalTable() {
+            const tbody = document.getElementById('journal-table-body');
+            const assetFilter = document.getElementById('filter-asset').value;
+            const timeframeFilter = document.getElementById('filter-timeframe').value;
+            const statusFilter = document.getElementById('filter-status').value;
+
+            tbody.innerHTML = '';
+
+            const filtered = state.journals.filter(item => {
+                const matchAsset = assetFilter === 'ALL' || item.asset === assetFilter;
+                const matchTF = timeframeFilter === 'ALL' || item.timeframe === timeframeFilter;
+                const matchStatus = statusFilter === 'ALL' || item.status === statusFilter;
+                return matchAsset && matchTF && matchStatus;
+            });
+
+            document.getElementById('journal-count').innerText = filtered.length;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="p-8 text-center text-slate-400">
+                            <i class="fa-solid fa-folder-open text-2xl mb-2 block"></i>
+                            ยังไม่มีรายการบันทึกผลการวิเคราะห์
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            filtered.forEach((item) => {
+                const plan = item.data.executionPlan;
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
+
+                let statusBadge = '';
+                if(item.status === 'WIN') statusBadge = `<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700">✅ Win (Hit TP)</span>`;
+                else if(item.status === 'LOSS') statusBadge = `<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-100 text-rose-700">❌ Loss (Hit SL)</span>`;
+                else statusBadge = `<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-700">⏳ Pending</span>`;
+
+                tr.innerHTML = `
+                    <td class="p-3.5 font-medium text-slate-600">${item.timestamp}</td>
+                    <td class="p-3.5"><span class="font-bold text-slate-900">${item.asset}</span></td>
+                    <td class="p-3.5"><span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono">${item.timeframe}</span></td>
+                    <td class="p-3.5">
+                        <span class="font-bold px-2 py-0.5 rounded text-[11px] ${plan.signal === 'BUY' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}">${plan.signal}</span>
+                    </td>
+                    <td class="p-3.5 font-mono text-[11px]">E: ${plan.entryPrice} | SL: ${plan.stopLoss} | TP: ${plan.takeProfit}</td>
+                    <td class="p-3.5 font-medium">${plan.rrRatio || '1:2'}</td>
+                    <td class="p-3.5">
+                        <div class="flex items-center gap-1.5">
+                            ${statusBadge}
+                            <select onchange="updateTradeStatus(${item.id}, this.value)" class="bg-white border border-slate-200 text-[11px] rounded p-1 focus:outline-none">
+                                <option value="PENDING" ${item.status === 'PENDING' ? 'selected' : ''}>Pending</option>
+                                <option value="WIN" ${item.status === 'WIN' ? 'selected' : ''}>Win (TP)</option>
+                                <option value="LOSS" ${item.status === 'LOSS' ? 'selected' : ''}>Loss (SL)</option>
+                            </select>
+                        </div>
+                    </td>
+                    <td class="p-3.5 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <button onclick="viewJournalDetail(${item.id})" class="text-blue-600 hover:text-blue-800 p-1" title="ดูรายละเอียด">
+                                <i class="fa-solid fa-eye text-sm"></i>
+                            </button>
+                            <button onclick="deleteJournalItem(${item.id})" class="text-rose-500 hover:text-rose-700 p-1" title="ลบรายการ">
+                                <i class="fa-solid fa-trash-can text-sm"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateTradeStatus(id, newStatus) {
+            const index = state.journals.findIndex(j => j.id === id);
+            if (index !== -1) {
+                state.journals[index].status = newStatus;
+                persistJournalData();
+                updateAnalyticsDashboard();
+                showToast('อัปเดตสถานะการเทรดสำเร็จ', 'success');
+            }
+        }
+
+        function deleteJournalItem(id) {
+            if(confirm('คุณต้องการลบรายการวิเคราะห์นี้ใช่หรือไม่?')) {
+                state.journals = state.journals.filter(j => j.id !== id);
+                persistJournalData();
+                renderJournalTable();
+                updateAnalyticsDashboard();
+                showToast('ลบรายการบันทึกเรียบร้อย', 'info');
+            }
+        }
+
+        function viewJournalDetail(id) {
+            const item = state.journals.find(j => j.id === id);
+            if (!item) return;
+
+            document.getElementById('modal-img').src = item.image;
+            const container = document.getElementById('modal-content');
+            
+            const data = item.data;
+            container.innerHTML = `
+                <div class="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-xl">
+                    <div><span class="text-slate-400">เวลา:</span> ${item.timestamp}</div>
+                    <div><span class="text-slate-400">สินทรัพย์:</span> ${item.asset} (${item.timeframe})</div>
+                    <div><span class="text-slate-400">สัญญาณ:</span> <b class="${data.executionPlan.signal === 'BUY'?'text-emerald-600':'text-rose-600'}">${data.executionPlan.signal}</b></div>
+                    <div><span class="text-slate-400">R:R Ratio:</span> ${data.executionPlan.rrRatio}</div>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-xl space-y-1">
+                    <div class="font-semibold text-slate-800">สรุปการวิเคราะห์ AI:</div>
+                    <p class="text-slate-600 leading-relaxed">${data.summary}</p>
+                </div>
+            `;
+
+            document.getElementById('journal-modal').classList.remove('hidden');
+        }
+
+        function closeJournalModal() {
+            document.getElementById('journal-modal').classList.add('hidden');
+        }
+
+        // --- AI Win Rate Analytics Calculations & Dashboard ---
+        function updateAnalyticsDashboard() {
+            const total = state.journals.length;
+            const win = state.journals.filter(j => j.status === 'WIN').length;
+            const loss = state.journals.filter(j => j.status === 'LOSS').length;
+            const pending = state.journals.filter(j => j.status === 'PENDING').length;
+
+            const completed = win + loss;
+            const winRate = completed > 0 ? ((win / completed) * 100).toFixed(1) : '0.0';
+
+            document.getElementById('stat-winrate').innerText = `${winRate}%`;
+            document.getElementById('stat-win-count').innerText = win;
+            document.getElementById('stat-loss-count').innerText = loss;
+            document.getElementById('stat-pending-count').innerText = pending;
+
+            if (state.activeTab === 'analytics') {
+                renderAnalyticsCharts();
+            }
+        }
+
+        function renderAnalyticsCharts() {
+            const win = state.journals.filter(j => j.status === 'WIN').length;
+            const loss = state.journals.filter(j => j.status === 'LOSS').length;
+            const pending = state.journals.filter(j => j.status === 'PENDING').length;
+
+            // Chart 1: Doughnut Win/Loss
+            const ctx1 = document.getElementById('chart-winloss').getContext('2d');
+            if (winLossChartInstance) winLossChartInstance.destroy();
+
+            winLossChartInstance = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Win (Hit TP)', 'Loss (Hit SL)', 'Pending'],
+                    datasets: [{
+                        data: [win, loss, pending],
+                        backgroundColor: ['#10b981', '#f43f5e', '#f59e0b'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            // Chart 2: Asset Breakdown
+            const assets = ['GOLD', 'BTC', 'STOCK'];
+            const assetWinData = assets.map(a => state.journals.filter(j => j.asset === a && j.status === 'WIN').length);
+            const assetLossData = assets.map(a => state.journals.filter(j => j.asset === a && j.status === 'LOSS').length);
+
+            const ctx2 = document.getElementById('chart-asset-breakdown').getContext('2d');
+            if (assetChartInstance) assetChartInstance.destroy();
+
+            assetChartInstance = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['Gold (XAU/USD)', 'Bitcoin (BTC)', 'Stock / Forex'],
+                    datasets: [
+                        { label: 'Win', data: assetWinData, backgroundColor: '#10b981', borderRadius: 6 },
+                        { label: 'Loss', data: assetLossData, backgroundColor: '#f43f5e', borderRadius: 6 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                    }
+                }
+            });
+        }
+
+        // --- Export / Import Backup JSON ---
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.journals, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `ai_trade_journal_backup_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast('ส่งออกข้อมูล JSON เรียบร้อยแล้ว', 'success');
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        state.journals = imported;
+                        persistJournalData();
+                        renderJournalTable();
+                        updateAnalyticsDashboard();
+                        showToast('นำเข้าข้อมูลสำรองสำเร็จ', 'success');
+                    } else {
+                        showToast('รูปแบบไฟล์ JSON ไม่ถูกต้อง', 'error');
+                    }
+                } catch (err) {
+                    showToast('เกิดข้อผิดพลาดในการอ่านไฟล์ JSON', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // --- Notification Toast ---
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const msgEl = document.getElementById('toast-msg');
+            const iconEl = document.getElementById('toast-icon');
+
+            msgEl.innerText = message;
+
+            if (type === 'success') {
+                iconEl.className = 'fa-solid fa-circle-check text-emerald-400 text-sm';
+            } else if (type === 'error') {
+                iconEl.className = 'fa-solid fa-circle-xmark text-rose-400 text-sm';
+            } else {
+                iconEl.className = 'fa-solid fa-circle-info text-blue-400 text-sm';
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
